@@ -1,0 +1,71 @@
+{
+  "last_node_id": 1,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "NSFWGuardAIO",
+      "pos": [
+        80,
+        120
+      ],
+      "size": [
+        460,
+        330
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 0
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null,
+          "slot_index": 1
+        },
+        {
+          "name": "result_json",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "NSFWGuardAIO"
+      },
+      "widgets_values": [
+        0.5,
+        0.5,
+        "scaleTech/myplaygirl-nsfw-classifier",
+        "Falconsai/nsfw_image_detection",
+        "A peaceful mountain landscape at sunrise"
+      ]
+    }
+  ],
+  "links": [],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        30,
+        30
+      ]
+    }
+  },
+  "version": 0.4
+}

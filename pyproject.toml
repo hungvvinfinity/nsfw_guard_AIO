@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comfyui-nsfw-guard-aio"
+version = "0.1.0"
+description = "Fail-closed prompt and image NSFW guard for ComfyUI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.5",
+    "transformers>=5.19.0,<6",
+    "huggingface-hub>=2.2.0,<3",
+    "tokenizers>=0.23.3,<0.24",
+    "sentencepiece>=0.2",
+    "protobuf>=4",
+    "Pillow>=10",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["nsfw_guard*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: opt-in checks requiring a running ComfyUI server"]

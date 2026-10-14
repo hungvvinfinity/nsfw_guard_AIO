@@ -1,0 +1,10 @@
+{
+  "1": {
+    "class_type": "NSFWGuardAIO",
+    "inputs": {
+      "prompt": "A peaceful mountain landscape at sunrise",
+      "prompt_sensitivity": 0.5,
+      "image_sensitivity": 0.5
+    }
+  }
+}
