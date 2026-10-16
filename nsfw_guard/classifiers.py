@@ -348,6 +348,45 @@ class Backend:
 
                 maximum = -1.0
                 flagged_index = 0
+                if isinstance(image, torch.Tensor):
+                    proc = classifier.processor
+                    mean_val = getattr(proc, "image_mean", None)
+                    std_val = getattr(proc, "image_std", None)
+                    if isinstance(mean_val, (list, tuple)) and isinstance(std_val, (list, tuple)):
+                        try:
+                            with torch.inference_mode():
+                                x = image.to(device=classifier.device, dtype=torch.float32)
+                                if x.ndim == 4:
+                                    if x.shape[-1] in (3, 4):
+                                        x = x[..., :3].permute(0, 3, 1, 2)
+                                    elif x.shape[1] in (3, 4):
+                                        x = x[:, :3]
+                                target_size = (224, 224)
+                                proc_size = getattr(proc, "size", None)
+                                if hasattr(proc_size, "get"):
+                                    h = proc_size.get("height", proc_size.get("shortest_edge", 224))
+                                    w = proc_size.get("width", proc_size.get("shortest_edge", 224))
+                                    target_size = (int(h), int(w))
+                                elif hasattr(proc_size, "__getitem__"):
+                                    target_size = (int(proc_size["height"]), int(proc_size["width"]))
+                                x_resized = torch.nn.functional.interpolate(x, size=target_size, mode="bilinear", align_corners=False)
+                                mean = torch.tensor(mean_val, device=x.device, dtype=torch.float32).view(1, 3, 1, 1)
+                                std = torch.tensor(std_val, device=x.device, dtype=torch.float32).view(1, 3, 1, 1)
+                                x_norm = (x_resized - mean) / std
+
+                                for index in range(x_norm.shape[0]):
+                                    _check_interrupted()
+                                    logits = classifier.model(pixel_values=x_norm[index:index + 1]).logits
+                                    score = _score(logits, classifier.nsfw_index, "image")
+                                    if score > maximum:
+                                        maximum, flagged_index = score, index
+                            return Assessment(maximum, flagged_index)
+                        except GuardError:
+                            raise
+                        except Exception as exc:
+                            _preserve_interrupt(exc)
+
+
                 with torch.inference_mode():
                     for index, tensor in enumerate(image):
                         _check_interrupted()

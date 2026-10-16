@@ -368,6 +368,28 @@ class InferenceTests(unittest.TestCase):
             self.assertTrue(0 <= assessment.confidence <= 1)
             self.assertIn(assessment.index, (0, 1))
 
+    def test_fast_path_tensor_image_preprocessing(self):
+        called_pixel_values = []
+        def dummy_model(pixel_values):
+            called_pixel_values.append(pixel_values)
+            return SimpleNamespace(logits=torch.tensor([[0.2, 0.8]]))
+
+        proc = SimpleNamespace(
+            image_mean=[0.5, 0.5, 0.5],
+            image_std=[0.5, 0.5, 0.5],
+            size={"height": 32, "width": 32},
+        )
+        classifier = Classifier(dummy_model, proc, 1, "cpu")
+        backend = Backend(ModelCache(lambda *args: classifier, lambda: "cpu"))
+
+        # Batch with [B, H, W, C]
+        image_bhwc = torch.zeros(2, 64, 64, 3)
+        assessment = backend.classify_image("image", image_bhwc)
+        self.assertAlmostEqual(assessment.confidence, 0.6456563, places=4)
+        self.assertEqual(len(called_pixel_values), 2)
+        self.assertEqual(called_pixel_values[0].shape, torch.Size([1, 3, 32, 32]))
+
+
     def test_local_text_model_requires_labels_and_respects_reversed_order(self):
         from tokenizers import Tokenizer
         from tokenizers.models import WordLevel
